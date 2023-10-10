@@ -1,0 +1,708 @@
+openapi: 3.0.1
+info:
+  contact:
+    email: info@midorisrl.eu
+    name: Midori
+  description: API per servizi Ned Premium
+  title: API Ned Premium
+  version: '1.0'
+servers:
+  - description: Test
+    url: https://certmidori.fairconnect.it/Midori-EXT
+    variables: {}
+tags:
+  - description: Login utente NED Premium, fornisce il token per utilizzare le API esposte
+    name: Login
+  - description: Servizio per testare la connessione al server
+    name: Test
+  - description: Set di API per sevizi Ned Premium
+    name: Operazioni
+paths:
+  /v1/premium/abitazioni/{identificativoUtente}:
+    get:
+      description: Recupera le abitazioni associate all'identificativo utente indicato nel path
+      operationId: getAbitazioni
+      parameters:
+        - in: path
+          name: identificativoUtente
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Risposta con lista id abitazioni:
+                  description: Risposta con lista id abitazioni
+                  summary: Esempio
+                  value:
+                    - 2
+                    - 128
+                    - 1043
+              schema:
+                type: array
+                items:
+                  type: integer
+                  format: int32
+          description: Lista id abitazioni recuperate
+        '400':
+          description: Uno o più campi in input non validi
+        '401':
+          description: Utente non autorizzato
+      security:
+        - Bearer Authentication: []
+      summary: Recupera le abitazioni associate all'identificativo utente
+      tags:
+        - Operazioni
+  /v1/premium/consumoTimestamp/{identificativoUtente}/{idAbitazione}/{dataStart}/{dataEnd}/{disaggregato}:
+    get:
+      description: Recupera il consumo del periodo richiesto per l'utente e l'abitazione nel path, aggregato o disaggregato per elettrodomestico in base al parametro {disaggregato}
+      operationId: consumoTimestamp
+      parameters:
+        - in: path
+          name: identificativoUtente
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: idAbitazione
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - in: path
+          name: dataStart
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: path
+          name: dataEnd
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: path
+          name: disaggregato
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Risposta con consumi aggregati:
+                  description: Risposta con consumi aggregati
+                  summary: Aggregati
+                  value:
+                    idAbitazione: 113
+                    dataConsumoStart: '1670972400'
+                    dataConsumoEnd: '1671145200'
+                    disaggregato: false
+                    consumoAggregato: 8442.1
+                    consumiElettrodomestici: []
+                Risposta con consumi disaggregati:
+                  description: Risposta con consumi disaggregati
+                  summary: Disaggregati
+                  value:
+                    idAbitazione: 113
+                    dataConsumoStart: '1670972400'
+                    dataConsumoEnd: '1671145200'
+                    disaggregato: true
+                    consumoAggregato: 8442.1
+                    consumiElettrodomestici:
+                      - nomeElettrodomestico: Frigorifero
+                        idDispositivo: 3
+                        consumoTotale: 833.5
+                      - nomeElettrodomestico: Elettronica e luci
+                        idDispositivo: 93
+                        consumoTotale: 3017.8
+                      - nomeElettrodomestico: Standby
+                        idDispositivo: 10
+                        consumoTotale: 1380.7
+                      - nomeElettrodomestico: Altro
+                        idDispositivo: 99
+                        consumoTotale: 2086
+              schema:
+                $ref: '#/components/schemas/Consumo'
+          description: Consumi recuperati
+        '400':
+          description: Uno o più campi in input non validi
+        '401':
+          description: Utente non autorizzato
+      security:
+        - Bearer Authentication: []
+      summary: Recupera consumo nel periodo richiesto
+      tags:
+        - Operazioni
+  /v1/premium/elettrodomestici/{identificativoUtente}/{idAbitazione}:
+    get:
+      description: Recupera i dati degli elettrodomestici per l' abitazione indicata
+      operationId: elettrodomestici
+      parameters:
+        - in: path
+          name: identificativoUtente
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: idAbitazione
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Risposta con lista di tutti gli elettrodomestici dell'abitazione indicata:
+                  description: Risposta con lista di tutti gli elettrodomestici dell'abitazione indicata
+                  summary: Lista elettrodomestici
+                  value:
+                    - idElettrodomestico: 3
+                      nomeElettrodomestico: Frigorifero
+                      numerosita: 1
+                      dataRispostaMissione: 1662897397
+                      idDimensione: 1
+                      descrizioneDimensione: Medio (1 anta)
+                      classeEnergetica: A++
+                      anno: Dopo il 2016
+                      marca: Electrolux
+                    - idElettrodomestico: 93
+                      nomeElettrodomestico: Elettronica e luci
+                      numerosita: 1
+                      dataRispostaMissione: 1662278467
+                      idDimensione: null
+                      descrizioneDimensione: ''
+                      classeEnergetica: ''
+                      anno: ''
+                      marca: ''
+                      dispositiviElettronici:
+                        - idDispositivo: 51
+                          nomeDispositivo: Console per videogiochi
+                          nomeCategoria: Intrattenimento
+                          idCategoria: 6
+                        - idDispositivo: 49
+                          nomeDispositivo: Decoder TV
+                          nomeCategoria: Altro
+                          idCategoria: 7
+                        - idDispositivo: 52
+                          nomeDispositivo: Impianto audio e video
+                          nomeCategoria: Intrattenimento
+                          idCategoria: 6
+                        - idDispositivo: 53
+                          nomeDispositivo: Laptop
+                          nomeCategoria: Intrattenimento
+                          idCategoria: 6
+                        - idDispositivo: 50
+                          nomeDispositivo: Smart speaker
+                          nomeCategoria: Altro
+                          idCategoria: 7
+                        - idDispositivo: 7
+                          nomeDispositivo: TV
+                          nomeCategoria: Intrattenimento
+                          idCategoria: 6
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DatiElettrodomestico'
+          description: Elettrodomestici recuperati
+        '400':
+          description: Uno o più campi in input non validi
+        '401':
+          description: Utente non autorizzato
+      security:
+        - Bearer Authentication: []
+      summary: Recupera elettrodomestici per l'abitazione indicata
+      tags:
+        - Operazioni
+  /v1/premium/elettrodomestico/{identificativoUtente}/{idAbitazione}/{idElettrodomestico}:
+    get:
+      description: Recupera i dati dell' elettrodomestico indicato per l' abitazione selezionata
+      operationId: elettrodomestico
+      parameters:
+        - in: path
+          name: identificativoUtente
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: idAbitazione
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - in: path
+          name: idElettrodomestico
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Risposta con dati dell'elettrodomestico individuato:
+                  description: Risposta con dati dell'elettrodomestico individuato
+                  summary: Dati elettrodomestico
+                  value:
+                    idElettrodomestico: 8
+                    nomeElettrodomestico: Lavatrice
+                    numerosita: 1
+                    dataRispostaMissione: 1663502155
+                    idDimensione: 2
+                    descrizioneDimensione: Grande (9/+kg)
+                    classeEnergetica: |-
+                      A+++
+                      -20%
+                    anno: Dopo il 2012
+                    marca: Samsung
+                Risposta con dati di Elettronica e Luci (idElettrodomestico = 93):
+                  description: Risposta con dati di Elettronica e Luci (idElettrodomestico = 93)
+                  summary: Dati Elettronica e Luci
+                  value:
+                    idElettrodomestico: 93
+                    nomeElettrodomestico: Elettronica e luci
+                    numerosita: 1
+                    dataRispostaMissione: 1662278467
+                    idDimensione: null
+                    descrizioneDimensione: ''
+                    classeEnergetica: ''
+                    anno: ''
+                    marca: ''
+                    dispositiviElettronici:
+                      - idDispositivo: 51
+                        nomeDispositivo: Console per videogiochi
+                        nomeCategoria: Intrattenimento
+                        idCategoria: 6
+                      - idDispositivo: 49
+                        nomeDispositivo: Decoder TV
+                        nomeCategoria: Altro
+                        idCategoria: 7
+                      - idDispositivo: 52
+                        nomeDispositivo: Impianto audio e video
+                        nomeCategoria: Intrattenimento
+                        idCategoria: 6
+                      - idDispositivo: 53
+                        nomeDispositivo: Laptop
+                        nomeCategoria: Intrattenimento
+                        idCategoria: 6
+                      - idDispositivo: 50
+                        nomeDispositivo: Smart speaker
+                        nomeCategoria: Altro
+                        idCategoria: 7
+                      - idDispositivo: 7
+                        nomeDispositivo: TV
+                        nomeCategoria: Intrattenimento
+                        idCategoria: 6
+              schema:
+                $ref: '#/components/schemas/DatiElettrodomestico'
+          description: Elettrodomestico recuperato
+        '400':
+          description: Uno o più campi in input non validi
+        '401':
+          description: Utente non autorizzato
+      security:
+        - Bearer Authentication: []
+      summary: Recupera elettrodomestico per l'abitazione indicata
+      tags:
+        - Operazioni
+  /v1/premium/login:
+    post:
+      operationId: login
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: password utente
+                username:
+                  type: string
+                  description: username utente
+              required:
+                - password
+                - username
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Esempio risposta API login:
+                  description: Esempio risposta API login
+                  summary: OK
+                  value:
+                    status: OK
+                    message: 'Token per autenticazione: ''token-da-inserire-in-fase-di-autenticazione'' '
+              schema:
+                type: string
+          description: JSON con le informazioni del token generato, utilizzare il token per accedere ai servizi esposti
+        '401':
+          description: Utente non autorizzato
+        '500':
+          description: Errore interno
+      summary: Procedura di login tramite username e password, fornisce il token da inserire in fase di autenticazione per utilizzare le API protette
+      tags:
+        - Login
+  /v1/premium/serialiUtenti:
+    get:
+      description: Recupera lista seriali ned e utenti associati per l'utility che chiama l'api
+      operationId: getSerialiUtenti
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Risposta con lista seriali ned e utenti associati:
+                  description: Risposta con lista seriali ned e utenti associati
+                  summary: Lista seriali utenti
+                  value:
+                    - serialeNed: '000000000000'
+                      userId: user0001
+                    - serialeNed: '111111111111'
+                      userId: user0002
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SerialeUtente'
+          description: Lista seriali ned e utenti associati recuperata
+        '401':
+          description: Utente non autorizzato
+      security:
+        - Bearer Authentication: []
+      summary: Recupera lista seriali ned e utenti associati
+      tags:
+        - Operazioni
+  /v1/premium/sessioni/{identificativoUtente}/{idAbitazione}/{dataStart}/{dataEnd}:
+    get:
+      description: Recupera la durata e il consumo delle sessioni di utilizzo degli elettrodomestici per utente e abitazione indicati
+      operationId: sessioni
+      parameters:
+        - in: path
+          name: identificativoUtente
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: idAbitazione
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - in: path
+          name: dataStart
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: path
+          name: dataEnd
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Risposta con lista sessioni di tutti gli elettrodomestici nel periodo indicato:
+                  description: Risposta con lista sessioni di tutti gli elettrodomestici nel periodo indicato
+                  summary: Lista sessioni elettrodomestici
+                  value:
+                    - idElettrodomestico: 6
+                      nomeElettrodomestico: Forno elettrico
+                      dataInizio: 1664993945
+                      dataFine: 1664995635
+                      durataMinuti: 28
+                      consumoSessione: 115.4
+                      numeroCicli: 11
+                      tipoCiclo: ''
+                    - idElettrodomestico: 93
+                      nomeElettrodomestico: Elettronica e luci
+                      dataInizio: 1664996051
+                      dataFine: 1665006196
+                      durataMinuti: 168
+                      consumoSessione: 944.5
+                      numeroCicli: 1
+                      tipoCiclo: ''
+                    - idElettrodomestico: 1
+                      nomeElettrodomestico: Lavastoviglie
+                      dataInizio: 1665039977
+                      dataFine: 1665045225
+                      durataMinuti: 87
+                      consumoSessione: 905.6
+                      numeroCicli: 2
+                      tipoCiclo: eco
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SessioneElettrodomestico'
+          description: Sessioni recuperate
+        '400':
+          description: Uno o più campi in input non validi
+        '401':
+          description: Utente non autorizzato
+      security:
+        - Bearer Authentication: []
+      summary: Recupera sessioni utilizzo elettrodomestici nel periodo richiesto
+      tags:
+        - Operazioni
+  /v1/premium/sessioniElettrodomestico/{identificativoUtente}/{idAbitazione}/{dataStart}/{dataEnd}/{idElettrodomestico}:
+    get:
+      description: Recupera la durata e il consumo delle sessioni di utilizzo degli elettrodomestici per utente e abitazione indicati
+      operationId: sessioniElettrodomestico
+      parameters:
+        - in: path
+          name: identificativoUtente
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: idAbitazione
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - in: path
+          name: dataStart
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: path
+          name: dataEnd
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: path
+          name: idElettrodomestico
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Risposta con lista sessioni dell' elettrodomestico nel periodo indicato:
+                  description: Risposta con lista sessioni dell' elettrodomestico nel periodo indicato
+                  summary: Lista sessioni elettrodomestico
+                  value:
+                    - idElettrodomestico: 8
+                      nomeElettrodomestico: Lavatrice
+                      dataInizio: 1670157338
+                      dataFine: 1670169136
+                      durataMinuti: 197
+                      consumoSessione: 61.7
+                      numeroCicli: 0
+                      tipoCiclo: freddo
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SessioneElettrodomestico'
+          description: Sessioni recuperate
+        '400':
+          description: Uno o più campi in input non validi
+        '401':
+          description: Utente non autorizzato
+      security:
+        - Bearer Authentication: []
+      summary: Recupera sessioni utilizzo elettrodomestici nel periodo richiesto
+      tags:
+        - Operazioni
+  /v1/premium/statoAttivazioneNed/{serialeNed}:
+    get:
+      description: 0=non attivo, 1=attivo
+      operationId: getStatoAttivazioneNed
+      parameters:
+        - in: path
+          name: serialeNed
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Risposta Attivo:
+                  description: Risposta Attivo
+                  summary: Risposta stato attivo
+                  value:
+                    codStato: 1
+                    descrizione: Attivo
+                Risposta Non Attivo:
+                  description: Risposta Non Attivo
+                  summary: Risposta stato non attivo
+                  value:
+                    codStato: 0
+                    descrizione: Non Attivo
+              schema:
+                $ref: '#/components/schemas/StatoAttivazioneNed'
+          description: Stato attivazione Ned recuperato correttamente
+        '401':
+          description: Utente non autorizzato
+      security:
+        - Bearer Authentication: []
+      summary: Recupera stato attivazione Ned
+      tags:
+        - Operazioni
+  /v1/premium/test:
+    get:
+      operationId: test
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      tags:
+        - Test
+components:
+  schemas:
+    Consumo:
+      type: object
+      properties:
+        consumiElettrodomestici:
+          type: array
+          description: Lista consumi disaggregati del periodo in Wh
+          items:
+            $ref: '#/components/schemas/ConsumoElettrodomestico'
+        consumoAggregato:
+          type: number
+          format: double
+          description: Valore che riporta il consumo aggregato del periodo in Wh
+        dataConsumoEnd:
+          type: integer
+          format: int64
+          description: Data fine periodo di consumo, timestamp
+          enum:
+            - null
+        dataConsumoStart:
+          type: integer
+          format: int64
+          description: Data inizio periodo di consumo, timestamp
+          enum:
+            - null
+        disaggregato:
+          type: boolean
+          description: Booleano per decidere se mostrare consumi aggregati o disaggregati
+          enum:
+            - true
+            - false
+        idAbitazione:
+          type: integer
+          format: int32
+          description: Identificativo univoco abitazione
+    ConsumoElettrodomestico:
+      type: object
+      description: Lista consumi disaggregati del periodo in Wh
+      properties:
+        consumoTotale:
+          type: number
+          format: double
+          description: Consumo totale in Wh
+        idDispositivo:
+          type: integer
+          format: int32
+          description: Identificativo elettrodomestico
+        nomeElettrodomestico:
+          type: string
+          description: Nome Elettrodomestico
+    DatiElettrodomestico:
+      type: object
+      properties:
+        anno:
+          type: string
+          description: Anno Elettrodomestico
+        classeEnergetica:
+          type: string
+          description: Classe energetica
+        dataRispostaMissione:
+          type: integer
+          format: int64
+          description: Data in cui sono stati inseriti i dati dell'elettrodomestico
+        descrizioneDimensione:
+          type: string
+          description: Descrizione dimensione elettrodomestico
+        idDimensione:
+          type: integer
+          format: int32
+          description: Id dimensione elettrodomestico
+        idElettrodomestico:
+          type: integer
+          format: int32
+          description: Identificativo elettrodomestico
+        marca:
+          type: string
+          description: Marca Elettrodomestico
+        nomeElettrodomestico:
+          type: string
+          description: Nome elettrodomestico
+        numerosita:
+          type: integer
+          format: int32
+          description: Numerosità del dispositivo
+    SerialeUtente:
+      type: object
+      properties:
+        serialeNed:
+          type: string
+          description: Codice seriale Ned
+        userId:
+          type: string
+          description: Identificativo utente
+    SessioneElettrodomestico:
+      type: object
+      properties:
+        consumoSessione:
+          type: number
+          format: double
+          description: Consumo della sessione in Wh
+        dataFine:
+          type: integer
+          format: int64
+          description: Timestamp data fine sessione
+        dataInizio:
+          type: integer
+          format: int64
+          description: Timestamp data inizio sessione
+        durataMinuti:
+          type: integer
+          format: int32
+          description: Durata della sessione in minuti
+        idElettrodomestico:
+          type: integer
+          format: int32
+          description: Id elettrodomestico
+        nomeElettrodomestico:
+          type: string
+          description: Nome elettrodomestico
+        numeroCicli:
+          type: integer
+          format: int32
+          description: Numero di cicli nella sessione
+        tipoCiclo:
+          type: string
+          description: Tipologia ciclo nella sessione
+    StatoAttivazioneNed:
+      type: object
+      properties:
+        codStato:
+          type: integer
+          format: int32
+        descrizione:
+          type: string
+  securitySchemes:
+    Bearer Authentication:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
